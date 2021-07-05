@@ -1,9 +1,12 @@
 const express = require('express');
 
 const app = express();
+const port = process.env.PORT || 8000
+
+app.use(express.static(__dirname + '/views'));
 
 app.get('/', (req, res) => {
-  res.render('Hello World');
+  res.render('index');
 });
 
-app.listen(8000, () => console.log("Listening on port 8000"));
+app.listen(port, () => console.log("Listening on port " + port));
