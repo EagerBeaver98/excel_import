@@ -16,6 +16,11 @@ const sqlConfig = {
 }
 
 app.get('/', (req, res) => {
+  sql.connect(sqlConfig, err => {
+    if (err) console.log(err)
+    
+  })
+  
   res.render('upload');
 });
 
