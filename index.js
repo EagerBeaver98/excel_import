@@ -1,20 +1,28 @@
 const express = require('express');
+require('dotenv').config()
 
 const app = express();
 const port = process.env.PORT || 8000
+
 
 app.use(express.static(__dirname + '\\views'))
 app.set("view engine", "ejs");
 
 const sql = require('mssql');
 
+
 const sqlConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   server: process.env.DB_SERVER,
   database: process.env.DB_DATABASE,
-  port: process.env.DB_PORT || 1433
+  port: 1433,
+  options: {
+    trustservercertificate: true
+  }
 }
+
+const pool = new sql.ConnectionPool(sqlConfig);
 
 app.get('/', (req, res) => {
   res.render('upload');
@@ -25,17 +33,20 @@ app.get('/complete', (req, res) => {
 });
 
 app.post('/excel', (req, res) => {
-  sql.connect(sqlConfig, (err) => {
-    if (err) console.log(err)
-    
-    const request = new sql.Request();
-
-    request.query('SELECT * FROM LLR_AB', (err, records) => {
-      if (err) console.log(err)
-      console.log("Records", records);
-    });
+  pool.connect().then(() => {
+    pool.query('SELECT * FROM LLR_AB')
+    .then(results => {
+      console.log("Query error", results)
+    })
+    .then(() => {
+      res.redirect('/complete');
+    })
   })
-  res.redirect('/complete');
+  .catch((err) => {
+      console.log("Connection Error", err);
+    })
+  
+  
 });
 
 app.listen(port, () => console.log("Listening on port " + port));
